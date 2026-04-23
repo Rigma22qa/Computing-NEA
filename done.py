@@ -92,7 +92,7 @@ def mainMenu():
 
 def startCameraFlow(mode, root):
     print("Camera flow started:", mode)
-frame=openCamera()
+    frame=openCamera()
     if frame is not None:
         processFrame(frame, mode)
 
