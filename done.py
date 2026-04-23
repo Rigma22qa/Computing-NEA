@@ -37,7 +37,7 @@ def createKeyboard(parent, entry):
             entry.insert(tk.END, " ")
         elif k == "BACK":
             if len(entry.get()) > 0:
-                entry.delete(len(entry.get())-1)
+                entry.delete(len(entry.get())-1, tk.END)
         else:
             entry.insert(tk.END, k)
 
@@ -252,8 +252,6 @@ def clearDB():
         con.commit()
         messagebox.showinfo("Done", "Database cleared")
 
-
-
 def showAddPersonScreen(frame, embedding, mode, root):
     window = tk.Toplevel(root)
 
@@ -316,7 +314,7 @@ def showAddPersonScreen(frame, embedding, mode, root):
         if keyboardFrame:
             keyboardFrame.destroy()
 
-    keyboardFrame = createKeyboard(keyboardArea, entry)
+        keyboardFrame = createKeyboard(keyboardArea, entry)
 
     nameEntry.bind("<Button-1>", lambda e: showKeyboard(nameEntry))
     relEntry.bind("<Button-1>", lambda e: showKeyboard(relEntry))
