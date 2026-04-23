@@ -67,10 +67,10 @@ def openCamera():
         
         if captured["frame"] is not None:
             picam2.stop()
-                picam2.close()
-                cv2.destroyAllWindows()
-                camera_open=False
-                return captured["frame"]
+            picam2.close()
+            cv2.destroyAllWindows()
+            camera_open=False
+            return captured["frame"]
         
         if cv2.waitKey(1)==27: # esc key
             picam2.stop()
