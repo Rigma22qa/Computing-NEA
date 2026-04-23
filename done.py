@@ -166,7 +166,7 @@ def showResult(frame, name, relationship):
     labelImg.pack()
     
     tk.Label(window, text=f"Recognised as {name}\nRelationship: {relationship}", font=("Arial", 14)).pack(pady=10)
-    tk.Button(window, text="Back", command=lambda: [window.destroy(), startCameraFlow("recognise")]).pack(pady=10)
+    tk.Button(window, text="Back", command=window.destroy).pack(pady=10)
     
 def clearDB():
     confirm = messagebox.askyesno("Confirm", "Delete all data?")
