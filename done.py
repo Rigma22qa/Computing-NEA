@@ -92,7 +92,7 @@ def mainMenu():
 
 def startCameraFlow(mode, root):
     print("Camera flow started:", mode)
-    import time
+frame=openCamera()
     if frame is not None:
         processFrame(frame, mode)
 
@@ -159,7 +159,7 @@ def tkColourConvert(frame):
     return ImageTk.PhotoImage(img)
         
 def showResult(frame, name, relationship):
-    window = tk.Toplevel()
+    window = tk.Toplevel(root)
     window.title("Result")
     
     window.attributes("-fullscreen", True)
@@ -167,7 +167,7 @@ def showResult(frame, name, relationship):
     window.grab_set()
     window.focus_set()
 
-    img=frame
+    img=tkColourConvert(frame)
     
     labelImg=tk.Label(window, image=img)
     labelImg.image=img
@@ -196,7 +196,7 @@ def showAddPersonScreen(frame, embedding, mode, root):
     window.focus_set()
 
 
-    img=frame
+    img=tkColourConvert(frame)
 
     labelImg = tk.Label(window, image=img, bg="white")
     labelImg.image = img
