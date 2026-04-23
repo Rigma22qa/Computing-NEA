@@ -28,6 +28,7 @@ def createKeyboard(parent, entry):
         ['Z','X','C','V','B','N','M'],
         ['SPACE','BACK']
     ]
+
     keyboardFrame = tk.Frame(parent, bg="black")
     keyboardFrame.grid(row=8, column=0, columnspan=2, pady=20)
 
@@ -35,19 +36,23 @@ def createKeyboard(parent, entry):
         if key == "SPACE":
             entry.insert(tk.END, " ")
         elif key == "BACK":
-            entry.delete(len(entry.get())-1, tk.END)
+            if len(entry.get()) > 0:
+                entry.delete(len(entry.get())-1)
         else:
             entry.insert(tk.END, key)
 
     for r, row in enumerate(keys):
         for c, key in enumerate(row):
+            width = 8 if key not in ["SPACE", "BACK"] else 12
+
             tk.Button(
                 keyboardFrame,
                 text=key,
-                width=5,
-                height=2,
+                width=width,
+                height=3,
+                font=("Arial", 14),
                 command=lambda k=key: press(k)
-            ).grid(row=r, column=c, padx=2, pady=2)
+            ).grid(row=r, column=c, padx=4, pady=4)
 
     return keyboardFrame
 
@@ -112,12 +117,19 @@ def mainMenu():
     root.attributes("-fullscreen", True)
     root.update_idletasks()
     root.update()
+    tk.Label(root, text="Face Recognition System", font=("Arial", 28)).pack(pady=30)
 
-    tk.Label(root, text="Face Recognition System", font=("Arial", 14)).pack(pady=10)
-    tk.Button(root, text="Recognise Person", width=25, command=lambda: startCameraFlow("recognise", root)).pack(pady=10)
-    tk.Button(root, text="Add New Person", width=25, command=lambda: startCameraFlow("add", root)).pack(pady=10)
-    tk.Button(root, text="Exit", command =root.destroy).pack(pady=10)
-    tk.Button(root, text="Clear Database", width=25, command=clearDB).pack(pady=10)
+    tk.Button(root, text="Recognise Person", font=("Arial", 20), width=20, height=2,
+              command=lambda: startCameraFlow("recognise", root)).pack(pady=20)
+
+    tk.Button(root, text="Add New Person", font=("Arial", 20), width=20, height=2,
+              command=lambda: startCameraFlow("add", root)).pack(pady=20)
+
+    tk.Button(root, text="Clear Database", font=("Arial", 18), width=18, height=2,
+              command=clearDB).pack(pady=20)
+
+    tk.Button(root, text="Exit", font=("Arial", 18), width=12, height=2,
+              command=root.destroy).pack(pady=20)
     root.mainloop()
 
 def startCameraFlow(mode, root):
@@ -191,20 +203,35 @@ def tkColourConvert(frame):
 def showResult(frame, name, relationship, root):
     window = tk.Toplevel(root)
     window.title("Result")
-    
+
     window.attributes("-fullscreen", True)
+    window.geometry("1024x600")
+    window.lift()
+    window.focus_force()
+
     window.transient(root)
     window.grab_set()
-    window.focus_set()
 
-    img=tkColourConvert(frame)
-    
-    labelImg=tk.Label(window, image=img)
-    labelImg.image=img
-    labelImg.pack()
-    
-    tk.Label(window, text=f"Recognised as {name}\nRelationship: {relationship}", font=("Arial", 14)).pack(pady=10)
-    tk.Button(window, text="Back", command=lambda:[window.grab_release(), window.destroy()]).pack(pady=10)
+    img = tkColourConvert(frame)
+
+    labelImg = tk.Label(window, image=img)
+    labelImg.image = img
+    labelImg.pack(pady=20)
+
+    tk.Label(
+        window,
+        text=f"Recognised as {name}\nRelationship: {relationship}",
+        font=("Arial", 24)
+    ).pack(pady=20)
+
+    tk.Button(
+        window,
+        text="Back",
+        font=("Arial", 20),
+        width=10,
+        height=2,
+        command=lambda: [window.grab_release(), window.destroy()]
+    ).pack(pady=20)
     
 def clearDB():
     confirm = messagebox.askyesno("Confirm", "Delete all data?")
@@ -235,12 +262,12 @@ def showAddPersonScreen(frame, embedding, mode, root):
              font=("Arial", 12)).grid(row=0, column=1, pady=5)
 
     tk.Label(window, text="Name:", bg="white").grid(row=1, column=1)
-    nameEntry = tk.Entry(window, font=("Arial", 18))
+    nameEntry = tk.Entry(window, font=("Arial", 24), width=15)
     nameEntry.grid(row=2, column=1, pady=5)
 
     tk.Label(window, text="Relationship:", bg="white").grid(row=3, column=1)
     relEntry = tk.Entry(window, font=("Arial", 18))
-    relEntry.grid(row=4, column=1, pady=5)
+    relEntry = tk.Entry(window, font=("Arial", 24), width=15)
 
     nameEntry.focus_set()
 
