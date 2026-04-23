@@ -6,7 +6,7 @@ from PIL import Image, ImageTk
 import sqlite3
 import tkinter as tk
 from tkinter import messagebox
-
+import os
 
 #setup models
 mtcnn = MTCNN(image_size=160, keep_all=False, device='cpu', post_process=False)#raspberry pi doesnt have cuda cores
@@ -186,12 +186,20 @@ def showAddPersonScreen(frame, embedding, mode):
     tk.Label(window, text="Name:", bg="white").grid(row=1, column=1)
     nameEntry = tk.Entry(window)
     nameEntry.grid(row=2, column=1, pady=5)
-    nameEntry.bind("<Button-1>", lambda e: nameEntry.focus_set())
 
     tk.Label(window, text="Relationship:", bg="white").grid(row=3, column=1)
     relEntry = tk.Entry(window)
     relEntry.grid(row=4, column=1, pady=5)
-    relEntry.bind("<Button-1>", lambda e: relEntry.focus_set())
+
+    nameEntry.bind(
+        "<ButtonRelease-1>",
+        lambda e: [nameEntry.focus_force(), os.system("pkill matchbox-keyboard; matchbox-keyboard &")]
+    )
+
+    relEntry.bind(
+        "<ButtonRelease-1>",
+        lambda e: [relEntry.focus_force(), os.system("pkill matchbox-keyboard; matchbox-keyboard &")]
+    )
 
     def savePerson():
         name = nameEntry.get()
@@ -203,7 +211,7 @@ def showAddPersonScreen(frame, embedding, mode):
 
         pid = addPerson(name, rel)
         saveEmbedding(pid, embedding)
-        messagebox.showinfor("Saved", "Person saved succesfully.")
+        messagebox.showinfo("Saved", "Person saved succesfully.")
         window.destroy()
 
     def retry():
