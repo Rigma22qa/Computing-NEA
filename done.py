@@ -9,7 +9,7 @@ from tkinter import messagebox
 import os
 
 camera_open = False
-
+keyboardProc=None
 #setup models
 mtcnn = MTCNN(image_size=160, keep_all=False, device='cpu', post_process=False)#raspberry pi doesnt have cuda cores
 resnet = InceptionResnetV1(pretrained='vggface2').eval().to('cpu')
@@ -20,6 +20,14 @@ cur=con.cursor()
 cur.execute("CREATE TABLE IF NOT EXISTS persons(id INTEGER PRIMARY KEY AUTOINCREMENT,name TEXT,relationship TEXT)")#only creates table if its not yet been made. Has a person id to identify person, their name and relation to patient. If this was in one table, the person could only have one embedding, allowing for more than one increases accuracy.
 cur.execute("CREATE TABLE IF NOT EXISTS embeddings (id INTEGER PRIMARY KEY AUTOINCREMENT,personID INTEGER,embedding BLOB,created_at DATETIME DEFAULT CURRENT_TIMESTAMP,FOREIGN KEY (personID) REFERENCES persons(id))  ")#creation of another table, new id for embeddings, id is used as a foreign key to link the tables, being made as personID
 con.commit()
+
+def openKeyboard():
+    global keyboardProc
+    if keyboardProc is None:
+        keyboardProc=os.popen("matchbox-keyboard &")
+
+def closeKeyboard():
+    os.system("pkill matchbox-keyboard")
 
 def openCamera():
     print("Opening Camera")
@@ -41,35 +49,33 @@ def openCamera():
     import time
     time.sleep(1)
 
+    captured={"frame":None}
+    def onTouch(event, x, y, flags, param):
+        if event==cv2EVENTLBUTTONDOWN
+        captured["frame"]=frame.copy
+
     while True:
         
         frame = picam2.capture_array()
         frame = cv2.cvtColor(frame, cv2.COLOR_RGB2BGR)
 
         print("Camera running")
-        cv2.putText(frame, "Press C to capture", (10, 30),
-                    cv2.FONT_HERSHEY_SIMPLEX, 0.7, (255,255,255), 2)
-
-        cv2.putText(frame, "Press ESC to exit", (10, 60),
+        cv2.putText(frame, "Tap screen to capture", (10, 30),
                     cv2.FONT_HERSHEY_SIMPLEX, 0.7, (255,255,255), 2)
 
         cv2.imshow("Camera", frame)
         
-        key = cv2.waitKey(1)
-        if key==ord('c'):
-            capturedFrame = frame.copy()
+        if captured["frame"] is not None:
             picam2.stop()
-            picam2.close()
-            cv2.destroyAllWindows()
-            cv2.waitKey(1)
-            camera_open=False
-            return capturedFrame
+                picam2.close()
+                cv2.destroyAllWindows()
+                camera_open=False
+                return captured["frame"]
         
-        if key==27: # esc key
+        if cv2.waitKey(1)==27: # esc key
             picam2.stop()
             picam2.close()
             cv2.destroyAllWindows()
-            cv2.waitKey(1)
             camera_open=False
             return None
         
@@ -216,10 +222,11 @@ def showAddPersonScreen(frame, embedding, mode, root):
 
     nameEntry.focus_set()
 
-    nameEntry.bind("<Button-1>", lambda e: nameEntry.focus_set())
-    relEntry.bind("<Button-1>", lambda e: relEntry.focus_set())
+    nameEntry.bind("<Button-1>", lambda e: [nameEntry.focus_set(), open_keyboard()])
+    relEntry.bind("<Button-1>", lambda e: [relEntry.focus_set(), open_keyboard()])
 
     def savePerson():
+        closeKeyboard()
         name = nameEntry.get()
         rel = relEntry.get()
 
@@ -234,6 +241,7 @@ def showAddPersonScreen(frame, embedding, mode, root):
         window.destroy()
 
     def retry():
+        closeKeyboard
         window.grab_release()
         window.destroy()
         startCameraFlow(mode, root)
@@ -241,5 +249,5 @@ def showAddPersonScreen(frame, embedding, mode, root):
     # buttons on tkinter screen
     tk.Button(window, text="Save", command=savePerson, height=2, width=10).grid(row=5, column=1, pady=5)
     tk.Button(window, text="Retry", command=retry).grid(row=6, column=1, pady=5)
-    tk.Button(window, text="Back", command=window.destroy).grid(row=7, column=1, pady=5)
+    tk.Button(window, text="Back", command=lambda: [closeKeyboard(), window.destroy()]).grid(row=7, column=1, pady=5)
 mainMenu()
