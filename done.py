@@ -8,6 +8,8 @@ import tkinter as tk
 from tkinter import messagebox
 import os
 
+camera_open = False
+
 #setup models
 mtcnn = MTCNN(image_size=160, keep_all=False, device='cpu', post_process=False)#raspberry pi doesnt have cuda cores
 resnet = InceptionResnetV1(pretrained='vggface2').eval().to('cpu')
@@ -21,7 +23,13 @@ con.commit()
 
 def openCamera():
     print("Opening Camera")
-
+    global camera_open
+    
+    if camera_open:
+        print("Camera already open")
+        return None
+    camera_open=True
+    
     picam2 = Picamera2()
     config=picam2.create_preview_configuration(main={"size": (480, 360)})
     picam2.configure(config)
@@ -49,12 +57,16 @@ def openCamera():
             picam2.stop()
             picam2.close()
             cv2.destroyAllWindows()
+            cv2.waitKey(1)
+            camera_open=False
             return capturedFrame
         
         if key==27: # esc key
             picam2.stop()
             picam2.close()
             cv2.destroyAllWindows()
+            cv2.waitKey(1)
+            camera_open=False
             return None
         
 
@@ -190,15 +202,10 @@ def showAddPersonScreen(frame, embedding, mode):
     relEntry = tk.Entry(window)
     relEntry.grid(row=4, column=1, pady=5)
 
-    nameEntry.bind(
-        "<ButtonRelease-1>",
-        lambda e: [nameEntry.focus_force(), os.system("pkill matchbox-keyboard; matchbox-keyboard &")]
-    )
+    nameEntry.focus_set()
 
-    relEntry.bind(
-        "<ButtonRelease-1>",
-        lambda e: [relEntry.focus_force(), os.system("pkill matchbox-keyboard; matchbox-keyboard &")]
-    )
+    nameEntry.bind("<ButtonRelease-1>", lambda e: nameEntry.focus_force())
+    relEntry.bind("<ButtonRelease-1>", lambda e: relEntry.focus_force())
 
     def savePerson():
         name = nameEntry.get()
