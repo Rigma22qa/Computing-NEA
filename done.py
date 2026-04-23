@@ -30,7 +30,7 @@ def createKeyboard(parent, entry):
     ]
 
     frame = tk.Frame(parent, bg="black")
-    frame.pack()
+    frame.pack(expand=True, fill="both")
 
     def press(k):
         if k == "SPACE":
@@ -43,42 +43,26 @@ def createKeyboard(parent, entry):
 
     for row in keys:
         r = tk.Frame(frame, bg="black")
-        r.pack()
+        r.pack(expand=True)
+
         for k in row:
-            w = 5 if k not in ["SPACE","BACK"] else 8
-            tk.Button(r, text=k, font=("Arial", 12),
-                      width=w, height=2,
-                      command=lambda x=k: press(x)
-            ).pack(side="left", padx=2, pady=2)
-
-    return frame
-
-    def press(key):
-        if key == "SPACE":
-            entry.insert(tk.END, " ")
-        elif key == "BACK":
-            if len(entry.get()) > 0:
-                entry.delete(len(entry.get())-1)
-        else:
-            entry.insert(tk.END, key)
-
-    for r, row in enumerate(keys):
-        rowFrame = tk.Frame(keyboardFrame, bg="black")
-        rowFrame.pack()
-
-        for key in row:
-            width = 6 if key not in ["SPACE", "BACK"] else 10
+            if k == "SPACE":
+                w = 10
+            elif k == "BACK":
+                w = 8
+            else:
+                w = 4
 
             tk.Button(
-                rowFrame,
-                text=key,
+                r,
+                text=k,
                 font=("Arial", 14),
-                width=width,
+                width=w,
                 height=2,
-                command=lambda k=key: press(k)
-            ).pack(side="left", padx=3, pady=3)
+                command=lambda x=k: press(x)
+            ).pack(side="left", expand=True, padx=2, pady=2)
 
-    return keyboardFrame
+    return frame
 
 def openCamera():
     print("Opening Camera")
@@ -318,16 +302,21 @@ def showAddPersonScreen(frame, embedding, mode, root):
     btns.pack(pady=20)
 
     # ===== KEYBOARD AREA (FIXED SPACE) =====
-    keyboardArea = tk.Frame(window, bg="black", height=200)
-    keyboardArea.grid(row=1, column=0, sticky="ew")
+    keyboardArea = tk.Frame(window, bg="black")
+    # DO NOT grid it yet
 
     keyboardFrame = None
 
     def showKeyboard(entry):
-        nonlocal keyboardFrame
-        if keyboardFrame:
-            keyboardFrame.destroy()
-        keyboardFrame = createKeyboard(keyboardArea, entry)
+    nonlocal keyboardFrame
+
+    # show keyboard area ONLY when needed
+    keyboardArea.grid(row=1, column=0, sticky="nsew")
+
+    if keyboardFrame:
+        keyboardFrame.destroy()
+
+    keyboardFrame = createKeyboard(keyboardArea, entry)
 
     nameEntry.bind("<Button-1>", lambda e: showKeyboard(nameEntry))
     relEntry.bind("<Button-1>", lambda e: showKeyboard(relEntry))
@@ -345,10 +334,12 @@ def showAddPersonScreen(frame, embedding, mode, root):
         saveEmbedding(pid, embedding)
 
         window.grab_release()
+        keyboardArea.grid_forget()
         window.destroy()
 
     def retry():
         window.grab_release()
+        keyboardArea.grid_forget()
         window.destroy()
         startCameraFlow(mode, root)
 
