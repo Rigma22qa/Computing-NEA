@@ -80,7 +80,6 @@ def mainMenu():
     root.title("Main menu")
     root.configure(background="white")
     root.attributes("-fullscreen", True)
-    root.attributes("-topmost", True)
     tk.Label(root, text="Face Recognition System", font=("Arial", 14)).pack(pady=10)
     tk.Button(root, text="Recognise Person", width=25, command=lambda: startCameraFlow("recognise")).pack(pady=10)
     tk.Button(root, text="Add New Person", width=25, command=lambda: startCameraFlow("add")).pack(pady=10)
@@ -162,9 +161,9 @@ def showResult(frame, name, relationship):
     window = tk.Toplevel()
     window.title("Result")
     window.attributes("-fullscreen", True)
-    window.attributes("-topmost", True)
-    window.focus_force()
-    window.lift()
+    window.transient
+    window.grab_set()
+    window.focus_set()
 
     img=tkColourConvert(frame)
     
@@ -190,10 +189,9 @@ def showAddPersonScreen(frame, embedding, mode):
     window = tk.Toplevel()
     window.title("Add Person")
     window.attributes("-fullscreen", True)
-    window.attributes("-topmost", True)
-    window.configure(bg="white")
-    window.focus_force()
-    window.lift()
+    window.transient()  
+    window.grab_set()   
+    window.focus_set()
 
     img = tkColourConvert(frame)
 
@@ -213,9 +211,6 @@ def showAddPersonScreen(frame, embedding, mode):
     relEntry.grid(row=4, column=1, pady=5)
 
     nameEntry.focus_set()
-
-    nameEntry.bind("<ButtonRelease-1>", lambda e: nameEntry.focus_force())
-    relEntry.bind("<ButtonRelease-1>", lambda e: relEntry.focus_force())
 
     def savePerson():
         name = nameEntry.get()
