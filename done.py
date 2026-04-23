@@ -21,13 +21,35 @@ cur.execute("CREATE TABLE IF NOT EXISTS persons(id INTEGER PRIMARY KEY AUTOINCRE
 cur.execute("CREATE TABLE IF NOT EXISTS embeddings (id INTEGER PRIMARY KEY AUTOINCREMENT,personID INTEGER,embedding BLOB,created_at DATETIME DEFAULT CURRENT_TIMESTAMP,FOREIGN KEY (personID) REFERENCES persons(id))  ")#creation of another table, new id for embeddings, id is used as a foreign key to link the tables, being made as personID
 con.commit()
 
-def openKeyboard():
-    global keyboardProc
-    if keyboardProc is None:
-        keyboardProc=os.popen("matchbox-keyboard &")
+def createKeyboard(parent, entry):
+    keys = [
+        ['Q','W','E','R','T','Y','U','I','O','P'],
+        ['A','S','D','F','G','H','J','K','L'],
+        ['Z','X','C','V','B','N','M'],
+        ['SPACE','BACK']
+    ]
+    keyboardFrame = tk.Frame(parent, bg="black")
+    keyboardFrame.grid(row=8, column=0, columnspan=2, pady=20)
 
-def closeKeyboard():
-    os.system("pkill matchbox-keyboard")
+    def press(key):
+        if key == "SPACE":
+            entry.insert(tk.END, " ")
+        elif key == "BACK":
+            entry.delete(len(entry.get())-1, tk.END)
+        else:
+            entry.insert(tk.END, key)
+
+    for r, row in enumerate(keys):
+        for c, key in enumerate(row):
+            tk.Button(
+                keyboardFrame,
+                text=key,
+                width=5,
+                height=2,
+                command=lambda k=key: press(k)
+            ).grid(row=r, column=c, padx=2, pady=2)
+
+    return keyboardFrame
 
 def openCamera():
     print("Opening Camera")
@@ -203,8 +225,7 @@ def showAddPersonScreen(frame, embedding, mode, root):
     window.grab_set()   
     window.focus_set()
 
-
-    img=tkColourConvert(frame)
+    img = tkColourConvert(frame)
 
     labelImg = tk.Label(window, image=img, bg="white")
     labelImg.image = img
@@ -214,18 +235,65 @@ def showAddPersonScreen(frame, embedding, mode, root):
              font=("Arial", 12)).grid(row=0, column=1, pady=5)
 
     tk.Label(window, text="Name:", bg="white").grid(row=1, column=1)
-    nameEntry = tk.Entry(window)
+    nameEntry = tk.Entry(window, font=("Arial", 18))
     nameEntry.grid(row=2, column=1, pady=5)
 
     tk.Label(window, text="Relationship:", bg="white").grid(row=3, column=1)
-    relEntry = tk.Entry(window)
+    relEntry = tk.Entry(window, font=("Arial", 18))
     relEntry.grid(row=4, column=1, pady=5)
 
     nameEntry.focus_set()
 
-    nameEntry.bind("<Button-1>", lambda e: [nameEntry.focus_set(), openKeyboard()])
-    relEntry.bind("<Button-1>", lambda e: [relEntry.focus_set(), openKeyboard()])
+    # 🔥 keyboard state INSIDE function
+    keyboardFrame = None
 
+    def showKeyboardFor(entry):
+        nonlocal keyboardFrame
+        if keyboardFrame:
+            keyboardFrame.destroy()
+        keyboardFrame = createKeyboard(window, entry)
+
+    # bind taps
+    nameEntry.bind("<Button-1>", lambda e: showKeyboardFor(nameEntry))
+    relEntry.bind("<Button-1>", lambda e: showKeyboardFor(relEntry))
+
+    def savePerson():
+        name = nameEntry.get()
+        rel = relEntry.get()
+
+        if not name.strip():
+            messagebox.showwarning("Error", "Enter a name")
+            return
+
+        pid = addPerson(name, rel)
+        saveEmbedding(pid, embedding)
+
+        if keyboardFrame:
+            keyboardFrame.destroy()
+
+        messagebox.showinfo("Saved", "Person saved successfully.")
+        window.grab_release()
+        window.destroy()
+
+    def retry():
+        if keyboardFrame:
+            keyboardFrame.destroy()
+        window.grab_release()
+        window.destroy()
+        startCameraFlow(mode, root)
+
+    tk.Button(window, text="Save", command=savePerson, height=2, width=10).grid(row=5, column=1, pady=5)
+    tk.Button(window, text="Retry", command=retry).grid(row=6, column=1, pady=5)
+    tk.Button(window, text="Back", command=lambda: [window.grab_release(), window.destroy()]).grid(row=7, column=1, pady=5)
+
+def showKeyboardFor(entry):
+    nonlocal keyboardFrame
+    if keyboardFrame:
+        keyboardFrame.destroy()
+    keyboardFrame = createKeyboard(window, entry)
+
+nameEntry.bind("<Button-1>", lambda e: showKeyboardFor(nameEntry))
+relEntry.bind("<Button-1>", lambda e: showKeyboardFor(relEntry))
     def savePerson():
         closeKeyboard()
         name = nameEntry.get()
@@ -242,7 +310,6 @@ def showAddPersonScreen(frame, embedding, mode, root):
         window.destroy()
 
     def retry():
-        closeKeyboard()
         window.grab_release()
         window.destroy()
         startCameraFlow(mode, root)
@@ -250,5 +317,5 @@ def showAddPersonScreen(frame, embedding, mode, root):
     # buttons on tkinter screen
     tk.Button(window, text="Save", command=savePerson, height=2, width=10).grid(row=5, column=1, pady=5)
     tk.Button(window, text="Retry", command=retry).grid(row=6, column=1, pady=5)
-    tk.Button(window, text="Back", command=lambda: [closeKeyboard(), window.destroy()]).grid(row=7, column=1, pady=5)
+    tk.Button(window, text="Back", command=lambda: [window.destroy()]).grid(row=7, column=1, pady=5)
 mainMenu()
