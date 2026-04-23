@@ -43,7 +43,8 @@ def openCamera():
 
     while True:
         
-        frame=picam2.capture_array()
+        frame = picam2.capture_array()
+        frame = cv2.cvtColor(frame, cv2.COLOR_RGB2BGR)
 
         print("Camera running")
         cv2.putText(frame, "Press C to capture", (10, 30),
@@ -94,7 +95,7 @@ def startCameraFlow(mode, root):
     print("Camera flow started:", mode)
     frame=openCamera()
     if frame is not None:
-        processFrame(frame, mode)
+        processFrame(frame, mode, root)
 
 def eucDist(a, b):
     return np.sqrt(np.sum((a-b)**2))
@@ -119,7 +120,7 @@ def processFrame(frame, mode, root):
     if dist < 0.7:
         showResult(frame, name, relationship, root)
     else:
-        showAddPersonScreen(frame, embedding, mode, root)
+        showAddPersonScreen(frame, name, relationship, root)
         
 def addPerson(name, relationship):
     cur.execute("INSERT INTO persons (name, relationship) VALUES (?, ?)", (name, relationship))
@@ -158,7 +159,7 @@ def tkColourConvert(frame):
     img=img.resize((200,200))
     return ImageTk.PhotoImage(img)
         
-def showResult(frame, name, relationship):
+def showResult(frame, name, relationship, root):
     window = tk.Toplevel(root)
     window.title("Result")
     
