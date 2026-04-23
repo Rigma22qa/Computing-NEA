@@ -249,16 +249,15 @@ def clearDB():
 
 
 def showAddPersonScreen(frame, embedding, mode, root):
-    window = tk.Toplevel(root)
-    window.title("Add Person")
-    window.attributes("-fullscreen", True)
-    window.transient(root)
-    window.grab_set()
-    window.focus_set()
-
-    window.grid_rowconfigure(0, weight=3)  # top section
-    window.grid_rowconfigure(1, weight=2)  # keyboard
-    window.grid_columnconfigure(0, weight=1)
+window = tk.Toplevel(root)
+window.title("Add Person")
+window.attributes("-fullscreen", True)
+window.overrideredirect(True)   # removes title bar completely
+window.geometry(f"{window.winfo_screenwidth()}x{window.winfo_screenheight()}+0+0")
+window.lift()
+window.focus_force()
+window.transient(root)
+window.grab_set()
 
     # ===== TOP FRAME (image + inputs) =====
     topFrame = tk.Frame(window, bg="white")
