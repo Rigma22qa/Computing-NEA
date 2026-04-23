@@ -292,8 +292,8 @@ def showKeyboardFor(entry):
         keyboardFrame.destroy()
     keyboardFrame = createKeyboard(window, entry)
 
-nameEntry.bind("<Button-1>", lambda e: showKeyboardFor(nameEntry))
-relEntry.bind("<Button-1>", lambda e: showKeyboardFor(relEntry))
+    nameEntry.bind("<Button-1>", lambda e: showKeyboardFor(nameEntry))
+    relEntry.bind("<Button-1>", lambda e: showKeyboardFor(relEntry))
     def savePerson():
         closeKeyboard()
         name = nameEntry.get()
