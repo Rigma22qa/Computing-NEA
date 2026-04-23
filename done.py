@@ -177,10 +177,12 @@ def showAddPersonScreen(frame, embedding, mode):
     tk.Label(window, text="Name:", bg="white").grid(row=1, column=1)
     nameEntry = tk.Entry(window)
     nameEntry.grid(row=2, column=1, pady=5)
+    nameEntry.bind("<Button-1>", lambda e: nameEntry.focus_set())
 
     tk.Label(window, text="Relationship:", bg="white").grid(row=3, column=1)
     relEntry = tk.Entry(window)
     relEntry.grid(row=4, column=1, pady=5)
+    relEntry.bind("<Button-1>", lambda e: relEntry.focus_set())
 
     def savePerson():
         name = nameEntry.get()
