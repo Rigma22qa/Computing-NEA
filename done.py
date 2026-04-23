@@ -76,49 +76,50 @@ def openCamera():
     cv2.destroyAllWindows()
     
 def mainMenu():
-    root=tk.Tk()
+    root = tk.Tk()
     root.title("Main menu")
     root.configure(background="white")
     root.attributes("-fullscreen", True)
+    root.update_idletasks()
+    root.update()
+
     tk.Label(root, text="Face Recognition System", font=("Arial", 14)).pack(pady=10)
-    tk.Button(root, text="Recognise Person", width=25, command=lambda: startCameraFlow("recognise")).pack(pady=10)
-    tk.Button(root, text="Add New Person", width=25, command=lambda: startCameraFlow("add")).pack(pady=10)
+    tk.Button(root, text="Recognise Person", width=25, command=lambda: startCameraFlow("recognise", root)).pack(pady=10)
+    tk.Button(root, text="Add New Person", width=25, command=lambda: startCameraFlow("add", root)).pack(pady=10)
     tk.Button(root, text="Exit", command =root.destroy).pack(pady=10)
     tk.Button(root, text="Clear Database", width=25, command=clearDB).pack(pady=10)
     root.mainloop()
 
-def startCameraFlow(mode):
+def startCameraFlow(mode, root):
     print("Camera flow started:", mode)
     import time
-    time.sleep(0.5)
-    frame=openCamera()
     if frame is not None:
         processFrame(frame, mode)
 
 def eucDist(a, b):
     return np.sqrt(np.sum((a-b)**2))
 
-def processFrame(frame, mode):
-    image=Image.fromarray(cv2.cvtColor(frame, cv2.COLOR_BGR2RGB))
+def processFrame(frame, mode, root):
+    image=frame#relic of when used opencv for camera, and had to convert colors, no time to remove
     croppedImage=mtcnn(image)
     
     if croppedImage is None:
         messagebox.showinfo("No face", "No face detected. Try again")
-        return None #if face is not found return nothing to be displayed on the tkinter screen
+        return
     
     embedding = resnet(croppedImage.unsqueeze(0)).detach().numpy()[0]
     
     if mode=="add":
-        showAddPersonScreen(frame, embedding, mode)
+        showAddPersonScreen(frame, embedding, mode, root)
         return
     #recognise mode
 
     name, relationship, dist = recognise(embedding)
     
     if dist < 0.7:
-        showResult(frame, name, relationship)
+        showResult(frame, name, relationship, root)
     else:
-        showAddPersonScreen(frame, embedding, mode)
+        showAddPersonScreen(frame, embedding, mode, root)
         
 def addPerson(name, relationship):
     cur.execute("INSERT INTO persons (name, relationship) VALUES (?, ?)", (name, relationship))
@@ -160,20 +161,20 @@ def tkColourConvert(frame):
 def showResult(frame, name, relationship):
     window = tk.Toplevel()
     window.title("Result")
+    
     window.attributes("-fullscreen", True)
-    window.transient(window.master)
+    window.transient(root)
     window.grab_set()
     window.focus_set()
-    window.lift()
 
-    img=tkColourConvert(frame)
+    img=frame
     
     labelImg=tk.Label(window, image=img)
     labelImg.image=img
     labelImg.pack()
     
     tk.Label(window, text=f"Recognised as {name}\nRelationship: {relationship}", font=("Arial", 14)).pack(pady=10)
-    tk.Button(window, text="Back", command=window.destroy).pack(pady=10)
+    tk.Button(window, text="Back", command=lambda:[window.grab_release(), window.destroy()]).pack(pady=10)
     
 def clearDB():
     confirm = messagebox.askyesno("Confirm", "Delete all data?")
@@ -186,16 +187,16 @@ def clearDB():
         con.commit()
         messagebox.showinfo("Done", "Database cleared")
 
-def showAddPersonScreen(frame, embedding, mode):
-    window = tk.Toplevel()
+def showAddPersonScreen(frame, embedding, mode, root):
+    window = tk.Toplevel(root)
     window.title("Add Person")
     window.attributes("-fullscreen", True)
-    window.transient(window.master)  
+    window.transient(root)  
     window.grab_set()   
     window.focus_set()
-    window.lift()
 
-    img = tkColourConvert(frame)
+
+    img=frame
 
     labelImg = tk.Label(window, image=img, bg="white")
     labelImg.image = img
@@ -214,6 +215,9 @@ def showAddPersonScreen(frame, embedding, mode):
 
     nameEntry.focus_set()
 
+    nameEntry.bind("<Button-1>", lambda e: nameEntry.focus_set())
+    relEntry.bind("<Button-1>", lambda e: relEntry.focus_set())
+
     def savePerson():
         name = nameEntry.get()
         rel = relEntry.get()
@@ -225,11 +229,13 @@ def showAddPersonScreen(frame, embedding, mode):
         pid = addPerson(name, rel)
         saveEmbedding(pid, embedding)
         messagebox.showinfo("Saved", "Person saved succesfully.")
+        window.grab_release()
         window.destroy()
 
     def retry():
+        window.grab_release()
         window.destroy()
-        startCameraFlow(mode)
+        startCameraFlow(mode, root)
 
     # buttons on tkinter screen
     tk.Button(window, text="Save", command=savePerson, height=2, width=10).grid(row=5, column=1, pady=5)
