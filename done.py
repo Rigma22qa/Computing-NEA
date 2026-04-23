@@ -27,6 +27,9 @@ def openCamera():
     picam2.configure(config)
     picam2.start()
 
+    import time
+    time.sleep(1)
+
     while True:
         
         frame=picam2.capture_array()
@@ -44,15 +47,17 @@ def openCamera():
         if key==ord('c'):
             capturedFrame = frame.copy()
             picam2.stop()
+            picam2.close()
             cv2.destroyAllWindows()
             return capturedFrame
         
         if key==27: # esc key
             picam2.stop()
+            picam2.close()
             cv2.destroyAllWindows()
             return None
         
-    cam.release()
+
     cv2.destroyAllWindows()
     
 def mainMenu():
@@ -70,6 +75,8 @@ def mainMenu():
 
 def startCameraFlow(mode):
     print("Camera flow started:", mode)
+    import time
+    time.sleep(0.5)
     frame=openCamera()
     if frame is not None:
         processFrame(frame, mode)
@@ -164,6 +171,8 @@ def showAddPersonScreen(frame, embedding, mode):
     window = tk.Toplevel()
     window.title("Add Person")
     window.configure(bg="white")
+    window.grab_set()
+    window.focus_force()
 
     img = tkColourConvert(frame)
 
@@ -194,6 +203,7 @@ def showAddPersonScreen(frame, embedding, mode):
 
         pid = addPerson(name, rel)
         saveEmbedding(pid, embedding)
+        messagebox.showinfor("Saved", "Person saved succesfully.")
         window.destroy()
 
     def retry():
