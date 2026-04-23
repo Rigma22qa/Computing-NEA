@@ -35,6 +35,9 @@ def openCamera():
     picam2.configure(config)
     picam2.start()
 
+    cv2.namedWindow("Camera", cv2.WND_PROP_FULLSCREEN)
+    cv2.setWindowProperty("Camera", cv2.WND_PROP_FULLSCREEN, cv2.WINDOW_FULLSCREEN)
+
     import time
     time.sleep(1)
 
@@ -77,7 +80,7 @@ def mainMenu():
     root.title("Main menu")
     root.configure(background="white")
     root.geometry("300x300")#shows width, length when window created.
-    root.attributes("-topmost", True)
+    root.attributes("-fullscreen", True)
     tk.Label(root, text="Face Recognition System", font=("Arial", 14)).pack(pady=10)
     tk.Button(root, text="Recognise Person", width=25, command=lambda: startCameraFlow("recognise")).pack(pady=10)
     tk.Button(root, text="Add New Person", width=25, command=lambda: startCameraFlow("add")).pack(pady=10)
@@ -158,6 +161,7 @@ def tkColourConvert(frame):
 def showResult(frame, name, relationship):
     window = tk.Toplevel()
     window.title("Result")
+    window.attributes("-fullscreen", True)
     
     img=tkColourConvert(frame)
     
@@ -182,6 +186,7 @@ def clearDB():
 def showAddPersonScreen(frame, embedding, mode):
     window = tk.Toplevel()
     window.title("Add Person")
+    window.attributes("-fullscreen", True)
     window.configure(bg="white")
     window.focus_force()
 
