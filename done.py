@@ -52,7 +52,7 @@ def openCamera():
     captured={"frame":None}
     def onTouch(event, x, y, flags, param):
         if event==cv2.EVENT_LBUTTONDOWN:
-            captured["frame"]=frame.copy
+            captured["frame"]=frame.copy()
     cv2.setMouseCallback("Camera", onTouch)
 
     while True:
@@ -118,7 +118,7 @@ def processFrame(frame, mode, root):
     embedding = resnet(croppedImage.unsqueeze(0)).detach().numpy()[0]
     
     if mode=="add":
-        showAddPersonScreen(frame, name, relationship, root)
+        showAddPersonScreen(frame, embedding, mode, root)
         return
     #recognise mode
 
@@ -127,7 +127,7 @@ def processFrame(frame, mode, root):
     if dist < 0.7:
         showResult(frame, name, relationship, root)
     else:
-        showAddPersonScreen(frame, name, relationship, root)
+        showAddPersonScreen(frame, embedding, mode, root)
         
 def addPerson(name, relationship):
     cur.execute("INSERT INTO persons (name, relationship) VALUES (?, ?)", (name, relationship))
