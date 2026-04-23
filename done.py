@@ -43,7 +43,7 @@ def openCamera():
         key = cv2.waitKey(1)
         if key==ord('c'):
             capturedFrame = frame.copy()
-            picam.stop()
+            picam2.stop()
             cv2.destroyAllWindows()
             return capturedFrame
         
