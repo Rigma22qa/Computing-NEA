@@ -30,7 +30,7 @@ def createKeyboard(parent, entry):
     ]
 
     keyboardFrame = tk.Frame(parent, bg="black")
-    keyboardFrame.grid(row=8, column=0, columnspan=2, pady=20)
+    keyboardFrame.pack(expand=True)
 
     def press(key):
         if key == "SPACE":
@@ -42,17 +42,20 @@ def createKeyboard(parent, entry):
             entry.insert(tk.END, key)
 
     for r, row in enumerate(keys):
-        for c, key in enumerate(row):
-            width = 8 if key not in ["SPACE", "BACK"] else 12
+        rowFrame = tk.Frame(keyboardFrame, bg="black")
+        rowFrame.pack()
+
+        for key in row:
+            width = 6 if key not in ["SPACE", "BACK"] else 10
 
             tk.Button(
-                keyboardFrame,
+                rowFrame,
                 text=key,
-                width=width,
-                height=3,
                 font=("Arial", 14),
+                width=width,
+                height=2,
                 command=lambda k=key: press(k)
-            ).grid(row=r, column=c, padx=4, pady=4)
+            ).pack(side="left", padx=3, pady=3)
 
     return keyboardFrame
 
@@ -244,46 +247,67 @@ def clearDB():
         con.commit()
         messagebox.showinfo("Done", "Database cleared")
 
+
 def showAddPersonScreen(frame, embedding, mode, root):
     window = tk.Toplevel(root)
     window.title("Add Person")
     window.attributes("-fullscreen", True)
-    window.transient(root)  
-    window.grab_set()   
+    window.transient(root)
+    window.grab_set()
     window.focus_set()
 
+    window.grid_rowconfigure(0, weight=3)  # top section
+    window.grid_rowconfigure(1, weight=2)  # keyboard
+    window.grid_columnconfigure(0, weight=1)
+
+    # ===== TOP FRAME (image + inputs) =====
+    topFrame = tk.Frame(window, bg="white")
+    topFrame.grid(row=0, column=0, sticky="nsew")
+
+    topFrame.grid_columnconfigure(0, weight=1)
+    topFrame.grid_columnconfigure(1, weight=1)
+
+    # ===== IMAGE =====
     img = tkColourConvert(frame)
+    imgLabel = tk.Label(topFrame, image=img, bg="white")
+    imgLabel.image = img
+    imgLabel.grid(row=0, column=0, padx=30, pady=30)
 
-    labelImg = tk.Label(window, image=img, bg="white")
-    labelImg.image = img
-    labelImg.grid(row=0, column=0, rowspan=5, padx=10, pady=10)
+    # ===== RIGHT SIDE (inputs) =====
+    rightFrame = tk.Frame(topFrame, bg="white")
+    rightFrame.grid(row=0, column=1, sticky="n", padx=20, pady=20)
 
-    tk.Label(window, text="Is this the correct photo?", bg="white",
-             font=("Arial", 12)).grid(row=0, column=1, pady=5)
+    tk.Label(rightFrame, text="Is this the correct photo?",
+             font=("Arial", 18), bg="white").pack(pady=10)
 
-    tk.Label(window, text="Name:", bg="white").grid(row=1, column=1)
-    nameEntry = tk.Entry(window, font=("Arial", 24), width=15)
-    nameEntry.grid(row=2, column=1, pady=5)
+    tk.Label(rightFrame, text="Name:", font=("Arial", 16), bg="white").pack()
+    nameEntry = tk.Entry(rightFrame, font=("Arial", 24), width=15)
+    nameEntry.pack(pady=10)
 
-    tk.Label(window, text="Relationship:", bg="white").grid(row=3, column=1)
-    relEntry = tk.Entry(window, font=("Arial", 18))
-    relEntry = tk.Entry(window, font=("Arial", 24), width=15)
+    tk.Label(rightFrame, text="Relationship:", font=("Arial", 16), bg="white").pack()
+    relEntry = tk.Entry(rightFrame, font=("Arial", 24), width=15)
+    relEntry.pack(pady=10)
 
-    nameEntry.focus_set()
+    # ===== BUTTONS =====
+    btnFrame = tk.Frame(rightFrame, bg="white")
+    btnFrame.pack(pady=20)
 
-    # 🔥 keyboard state INSIDE function
+    # ===== KEYBOARD FRAME =====
+    keyboardContainer = tk.Frame(window, bg="black")
+    keyboardContainer.grid(row=1, column=0, sticky="nsew")
+
     keyboardFrame = None
 
     def showKeyboardFor(entry):
         nonlocal keyboardFrame
         if keyboardFrame:
             keyboardFrame.destroy()
-        keyboardFrame = createKeyboard(window, entry)
+        keyboardFrame = createKeyboard(keyboardContainer, entry)
 
-    # bind taps
     nameEntry.bind("<Button-1>", lambda e: showKeyboardFor(nameEntry))
     relEntry.bind("<Button-1>", lambda e: showKeyboardFor(relEntry))
 
+    # ===== ACTIONS =====
     def savePerson():
         name = nameEntry.get()
         rel = relEntry.get()
@@ -295,22 +319,23 @@ def showAddPersonScreen(frame, embedding, mode, root):
         pid = addPerson(name, rel)
         saveEmbedding(pid, embedding)
 
-        if keyboardFrame:
-            keyboardFrame.destroy()
-
-        messagebox.showinfo("Saved", "Person saved successfully.")
         window.grab_release()
         window.destroy()
 
     def retry():
-        if keyboardFrame:
-            keyboardFrame.destroy()
         window.grab_release()
         window.destroy()
         startCameraFlow(mode, root)
 
-    tk.Button(window, text="Save", command=savePerson, height=2, width=10).grid(row=5, column=1, pady=5)
-    tk.Button(window, text="Retry", command=retry).grid(row=6, column=1, pady=5)
-    tk.Button(window, text="Back", command=lambda: [window.grab_release(), window.destroy()]).grid(row=7, column=1, pady=5)
+    # ===== BUTTONS UI =====
+    tk.Button(btnFrame, text="Save", font=("Arial", 18),
+              width=10, height=2, command=savePerson).pack(pady=5)
 
+    tk.Button(btnFrame, text="Retry", font=("Arial", 16),
+              width=10, height=2, command=retry).pack(pady=5)
+
+    tk.Button(btnFrame, text="Back", font=("Arial", 16),
+              width=10, height=2,
+              command=lambda: [window.grab_release(), window.destroy()]
+              ).pack(pady=5)
 mainMenu()
