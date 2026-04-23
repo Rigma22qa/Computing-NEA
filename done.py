@@ -286,36 +286,4 @@ def showAddPersonScreen(frame, embedding, mode, root):
     tk.Button(window, text="Retry", command=retry).grid(row=6, column=1, pady=5)
     tk.Button(window, text="Back", command=lambda: [window.grab_release(), window.destroy()]).grid(row=7, column=1, pady=5)
 
-def showKeyboardFor(entry):
-    nonlocal keyboardFrame
-    if keyboardFrame:
-        keyboardFrame.destroy()
-    keyboardFrame = createKeyboard(window, entry)
-
-    nameEntry.bind("<Button-1>", lambda e: showKeyboardFor(nameEntry))
-    relEntry.bind("<Button-1>", lambda e: showKeyboardFor(relEntry))
-    def savePerson():
-        closeKeyboard()
-        name = nameEntry.get()
-        rel = relEntry.get()
-
-        if not name.strip():
-            messagebox.showwarning("Error", "Enter a name")
-            return
-
-        pid = addPerson(name, rel)
-        saveEmbedding(pid, embedding)
-        messagebox.showinfo("Saved", "Person saved succesfully.")
-        window.grab_release()
-        window.destroy()
-
-    def retry():
-        window.grab_release()
-        window.destroy()
-        startCameraFlow(mode, root)
-
-    # buttons on tkinter screen
-    tk.Button(window, text="Save", command=savePerson, height=2, width=10).grid(row=5, column=1, pady=5)
-    tk.Button(window, text="Retry", command=retry).grid(row=6, column=1, pady=5)
-    tk.Button(window, text="Back", command=lambda: [window.destroy()]).grid(row=7, column=1, pady=5)
 mainMenu()
