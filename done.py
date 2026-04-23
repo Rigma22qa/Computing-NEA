@@ -51,8 +51,8 @@ def openCamera():
 
     captured={"frame":None}
     def onTouch(event, x, y, flags, param):
-        if event==cv2EVENTLBUTTONDOWN
-        captured["frame"]=frame.copy
+        if event==cv2EVENTLBUTTONDOWN:
+            captured["frame"]=frame.copy
 
     while True:
         
