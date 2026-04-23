@@ -171,7 +171,6 @@ def showAddPersonScreen(frame, embedding, mode):
     window = tk.Toplevel()
     window.title("Add Person")
     window.configure(bg="white")
-    window.grab_set()
     window.focus_force()
 
     img = tkColourConvert(frame)
@@ -219,7 +218,7 @@ def showAddPersonScreen(frame, embedding, mode):
         startCameraFlow(mode)
 
     # buttons on tkinter screen
-    tk.Button(window, text="Save", command=savePerson).grid(row=5, column=1, pady=5)
+    tk.Button(window, text="Save", command=savePerson, height=2, width=10).grid(row=5, column=1, pady=5)
     tk.Button(window, text="Retry", command=retry).grid(row=6, column=1, pady=5)
     tk.Button(window, text="Back", command=window.destroy).grid(row=7, column=1, pady=5)
 mainMenu()
