@@ -161,9 +161,10 @@ def showResult(frame, name, relationship):
     window = tk.Toplevel()
     window.title("Result")
     window.attributes("-fullscreen", True)
-    window.transient
+    window.transient(window.master)
     window.grab_set()
     window.focus_set()
+    window.lift()
 
     img=tkColourConvert(frame)
     
@@ -189,9 +190,10 @@ def showAddPersonScreen(frame, embedding, mode):
     window = tk.Toplevel()
     window.title("Add Person")
     window.attributes("-fullscreen", True)
-    window.transient()  
+    window.transient(window.master)  
     window.grab_set()   
     window.focus_set()
+    window.lift()
 
     img = tkColourConvert(frame)
 
