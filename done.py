@@ -51,8 +51,9 @@ def openCamera():
 
     captured={"frame":None}
     def onTouch(event, x, y, flags, param):
-        if event==cv2EVENTLBUTTONDOWN:
+        if event==cv2.EVENT_LBUTTONDOWN:
             captured["frame"]=frame.copy
+    cv2.setMouseCallback("Camera", onTouch)
 
     while True:
         
@@ -117,7 +118,7 @@ def processFrame(frame, mode, root):
     embedding = resnet(croppedImage.unsqueeze(0)).detach().numpy()[0]
     
     if mode=="add":
-        showAddPersonScreen(frame, embedding, mode, root)
+        showAddPersonScreen(frame, name, relationship, root)
         return
     #recognise mode
 
@@ -222,8 +223,8 @@ def showAddPersonScreen(frame, embedding, mode, root):
 
     nameEntry.focus_set()
 
-    nameEntry.bind("<Button-1>", lambda e: [nameEntry.focus_set(), open_keyboard()])
-    relEntry.bind("<Button-1>", lambda e: [relEntry.focus_set(), open_keyboard()])
+    nameEntry.bind("<Button-1>", lambda e: [nameEntry.focus_set(), openKeyboard()])
+    relEntry.bind("<Button-1>", lambda e: [relEntry.focus_set(), openKeyboard()])
 
     def savePerson():
         closeKeyboard()
@@ -241,7 +242,7 @@ def showAddPersonScreen(frame, embedding, mode, root):
         window.destroy()
 
     def retry():
-        closeKeyboard
+        closeKeyboard()
         window.grab_release()
         window.destroy()
         startCameraFlow(mode, root)
