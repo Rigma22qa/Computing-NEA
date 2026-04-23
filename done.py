@@ -79,8 +79,8 @@ def mainMenu():
     root=tk.Tk()
     root.title("Main menu")
     root.configure(background="white")
-    root.geometry("300x300")#shows width, length when window created.
     root.attributes("-fullscreen", True)
+    root.attributes("-topmost", True)
     tk.Label(root, text="Face Recognition System", font=("Arial", 14)).pack(pady=10)
     tk.Button(root, text="Recognise Person", width=25, command=lambda: startCameraFlow("recognise")).pack(pady=10)
     tk.Button(root, text="Add New Person", width=25, command=lambda: startCameraFlow("add")).pack(pady=10)
@@ -162,7 +162,10 @@ def showResult(frame, name, relationship):
     window = tk.Toplevel()
     window.title("Result")
     window.attributes("-fullscreen", True)
-    
+    window.attributes("-topmost", True)
+    window.focus_force()
+    window.lift()
+
     img=tkColourConvert(frame)
     
     labelImg=tk.Label(window, image=img)
@@ -187,8 +190,10 @@ def showAddPersonScreen(frame, embedding, mode):
     window = tk.Toplevel()
     window.title("Add Person")
     window.attributes("-fullscreen", True)
+    window.attributes("-topmost", True)
     window.configure(bg="white")
     window.focus_force()
+    window.lift()
 
     img = tkColourConvert(frame)
 
