@@ -308,13 +308,13 @@ def showAddPersonScreen(frame, embedding, mode, root):
     keyboardFrame = None
 
     def showKeyboard(entry):
-    nonlocal keyboardFrame
+        nonlocal keyboardFrame
 
-    # show keyboard area ONLY when needed
-    keyboardArea.grid(row=1, column=0, sticky="nsew")
+        # show keyboard area ONLY when needed
+        keyboardArea.grid(row=1, column=0, sticky="nsew")
 
-    if keyboardFrame:
-        keyboardFrame.destroy()
+        if keyboardFrame:
+            keyboardFrame.destroy()
 
     keyboardFrame = createKeyboard(keyboardArea, entry)
 
